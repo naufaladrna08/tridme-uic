@@ -1,155 +1,130 @@
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
-#include <stdio.h>
+/*
+ * Tridme UI Example Program: Calculator
+ * 
+ * In this example, I will demonstrate how to use Tridme UI for making 
+ * real-world application like Calculator. We will use some widgets, like
+ * Input, Buttons and Panel.
+ * 
+ * Author: Naufal Adriansyah
+ * (C) Kincir Angin 2026
+ */
+
+#include <stdio.h> // Essential for debugging
+
+
+/* Tridme UI's include files */
+#include <stdlib.h>
 #include <ui_core.h>
 #include <ui_widgets.h>
+#include <ui_utils.h>
 
-static UIContext* g_ui = NULL;
-const int WINDOW_WIDTH = 200;
-const int WINDOW_HEIGHT = 400;
+/* 
+ * Tridme UI doesn't provides window instance creation class, so we need a 
+ * window handling libraries like GLFW or you can use native Windows or X11
+ * to build the Window. In this example, we'll use GLFW for it's simplicity
+ * and cross-platform support. We also need OpenGL function loader and we'll
+ * GLEW for this example. 
+ */
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
 
-static void error_callback(int error, const char* description) {
-  fprintf(stderr, "Error: %s\n", description);
+/* Global Variables */
+const char* APP_NAME = "CALCULATOR";
+const int WINDOW_WIDTH = 400;
+const int WINDOW_HEIGHT = 800;
+UIContext* g_ui;
+
+static void error_callback(int error_code, const char* description) {
+  fprintf(stderr, "GLFW Error %d: %s\n", error_code, description);
 }
 
 static void char_callback(GLFWwindow* window, unsigned int codepoint) {
-  if (g_ui) {
-    ui_input_char(g_ui, codepoint);
-  }
+
 }
 
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-  if (g_ui && action == GLFW_PRESS) {
-    printf("Key pressed: %d\n", key);
-    ui_set_key(g_ui, key, true);
-  }
+
 }
 
-int main(int argc, char** argv) {
-  // Initialize GLFW
-  if (!glfwInit()) {
-    fprintf(stderr, "Failed to initialize GLFW\n");
-    return -1;
-  }
-  
-  glfwSetErrorCallback(error_callback);
-  
+int main(int argc, const char** argv) {
+  printf("Calculator App Running...\n");
+
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-  
-  GLFWwindow* window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Calculator Demo", NULL, NULL);
-  if (!window) {
-    fprintf(stderr, "Failed to create GLFW window\n");
-    glfwTerminate();
-    return -1;
+
+  /* Create Window Instance */
+  if (!glfwInit()) {
+    fprintf(stderr, "Failed to initialize GLFW\n");
   }
-  
+
+  glfwSetErrorCallback(error_callback);
+
+  GLFWwindow* window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, APP_NAME, NULL, NULL);
+  if (window == NULL) {
+    fprintf(stderr, "Failed to create GLFW window");
+    glfwTerminate();
+    return EXIT_FAILURE;
+  }
+
   glfwMakeContextCurrent(window);
-  glewExperimental = GL_TRUE;
+  glewExperimental = true;
   glewInit();
-  
-  /* Create Tridme UI context */
+
+  /* Create Graphic Context */
   UIContext* ui = ui_create_context(WINDOW_WIDTH, WINDOW_HEIGHT);
   g_ui = ui;
-  
-  /* Setup callbacks */
+
   glfwSetCharCallback(window, char_callback);
   glfwSetKeyCallback(window, key_callback);
 
-  const char* label = "Calculator";
-  char buffer[256] = "0";
-  char buttons[4][5] = {
-    {'7', '8', '9', '/', 'A'},
-    {'4', '5', '6', '*', 'B'},
-    {'1', '2', '3', '-', 'C'},
-    {'0', '.', '=', '+', 'D'}
-  };
-  float button_size = 20.0f;
+  float deltaTime = 0.0f;
+  float lastFrame = 0.0f;
+
+  const char* menu[4] = { "FILE", "MODE", "OPTION", "ABOUT" };
+  float button_size = 100.0f;
   
   while (!glfwWindowShouldClose(window)) {
+    float currentFrame = glfwGetTime();
+    deltaTime = currentFrame - currentFrame;
+    lastFrame = currentFrame;
+ 
     glfwPollEvents();
-    
-    // Clear screen
+
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    
-    // Update input BEFORE beginning frame (so prev state is captured correctly)
+
+    /* To make event works, sadly Tridme UI need some data to be filled */
     double mouse_x, mouse_y;
     glfwGetCursorPos(window, &mouse_x, &mouse_y);
-    ui_set_mouse_position(ui, (float)mouse_x, (float)mouse_y);
-    
+    ui_set_mouse_position(ui, mouse_x, mouse_y);
     ui_set_mouse_button(ui, 0, glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT));
     ui_set_mouse_button(ui, 1, glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT));
-    
-    // Begin UI frame (this copies current mouse state to previous)
-    ui_begin_frame(ui, 0.016f);
 
-    // Create a panel for the calculator
-    ui_panel_begin(ui, "calc_panel", (rect){{10, 10},
-                  {180, 380}}, 
-                  (color){0.2f, 0.2f, 0.2f, 1.0f});
+    ui_begin_frame(ui, deltaTime);
+    ui_panel_begin(ui, "main_panel", (rect) { { 0, 0 }, { WINDOW_WIDTH, WINDOW_HEIGHT } }, color_from_hex("#3f3f3fff"));
+    ui_push_layout(ui, (vec2) { 0, 0 });
 
-    // Draw label
-    ui_label(ui, label, (rect){{20, 20}, {140, 30}}, 
-             (color){1.0f, 1.0f, 1.0f, 1.0f});
+    for (int i = 0; i < 4; i++) {
+      rect btn_bounds = {
+        { i * button_size, 0 },
+        { button_size, button_size / 3 }
+      };
 
-    // Draw text input for display
-    ui_text_input(ui, "calc_display", (rect){{20, 60}, {140, 30}}, 
-                  buffer, sizeof(buffer));
-
-    // Draw buttons
-    for (int row = 0; row < 4; row++) {
-      for (int col = 0; col < 5; col++) {
-        char btn_label[2] = {buttons[row][col], '\0'};
-        rect btn_bounds = {
-          {20.0f + col * (button_size + 10.0f), 110.0f + row * (button_size + 10.0f)},
-          {button_size, button_size}
-        };
-        if (ui_button(ui, btn_label, btn_bounds)) {
-          // Handle button press
-          size_t len = 0;
-          while (buffer[len] != '\0') len++;
-          if (len < sizeof(buffer) - 1) {
-            buffer[len] = buttons[row][col];
-            buffer[len + 1] = '\0';
-          }
-
-          if (buttons[row][col] == 'A') {
-            buffer[0] = '\0'; // Clear
-          }
-
-          if (buttons[row][col] == 'D') {
-            // Simple evaluation for demonstration (only handles single digit operations)
-            int result = 0;
-            int num1 = buffer[0] - '0';
-            int num2 = buffer[2] - '0';
-            char op = buffer[1];
-            switch (op) {
-              case '+': result = num1 + num2; break;
-              case '-': result = num1 - num2; break;
-              case '*': result = num1 * num2; break;
-              case '/': if (num2 != 0) result = num1 / num2; break;
-              default: break;
-            }
-            snprintf(buffer, sizeof(buffer), "%d", result);
-          }
-        }
+      if (ui_button(ui, menu[i], btn_bounds)) {
+        printf("Button is pressed\n");
       }
     }
-
+    
+    ui_pop_layout(ui);
     ui_panel_end(ui);
-    
-    // End UI frame and render
     ui_end_frame(ui);
-    
+
     glfwSwapBuffers(window);
   }
-  
-  // Cleanup
+
   ui_destroy_context(ui);
   glfwDestroyWindow(window);
   glfwTerminate();
-  
   return 0;
 }

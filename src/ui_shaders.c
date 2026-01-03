@@ -18,9 +18,9 @@ static const char* vertex_shader_source =
 "uniform mat4 projection;\n"
 "\n"
 "void main() {\n"
-"    gl_Position = projection * vec4(aPos, 0.0, 1.0);\n"
-"    TexCoord = aTexCoord;\n"
-"    Color = aColor;\n"
+"  gl_Position = projection * vec4(aPos, 0.0, 1.0);\n"
+"  TexCoord = aTexCoord;\n"
+"  Color = aColor;\n"
 "}\n";
 
 // Fragment shader source
@@ -36,8 +36,8 @@ static const char* fragment_shader_source =
 "uniform vec4 color;\n"
 "\n"
 "void main() {\n"
-"    float alpha = texture(tex, TexCoord).r;\n"
-"    FragColor = vec4(color.rgb, color.a * alpha) * Color;\n"
+"  float alpha = texture(tex, TexCoord).r;\n"
+"  FragColor = vec4(color.rgb, color.a * alpha) * Color;\n"
 "}\n";
 
 // Fragment shader for solid colors (no texture)
@@ -52,7 +52,7 @@ static const char* fragment_shader_solid_source =
 "uniform vec4 color;\n"
 "\n"
 "void main() {\n"
-"    FragColor = color * Color;\n"
+"  FragColor = color * Color;\n"
 "}\n";
 
 // Rounded rectangle fragment shader
@@ -70,29 +70,29 @@ static const char* fragment_shader_rounded_source =
 "uniform vec2 position;\n"
 "\n"
 "float roundedBoxSDF(vec2 p, vec2 b, float r) {\n"
-"    vec2 q = abs(p) - b + r;\n"
-"    return min(max(q.x, q.y), 0.0) + length(max(q, 0.0)) - r;\n"
+"  vec2 q = abs(p) - b + r;\n"
+"  return min(max(q.x, q.y), 0.0) + length(max(q, 0.0)) - r;\n"
 "}\n"
 "\n"
 "void main() {\n"
-"    vec2 center = vec2(size.x * 0.5, size.y * 0.5);\n"
-"    vec2 p = TexCoord * size - center;\n"
-"    \n"
-"    float distance = roundedBoxSDF(p, center, radius);\n"
-"    \n"
-"    if (distance > 0.0) {\n"
-"        discard;\n"
-"    }\n"
-"    \n"
-"    FragColor = color * Color;\n"
+"  vec2 center = vec2(size.x * 0.5, size.y * 0.5);\n"
+"  vec2 p = TexCoord * size - center;\n"
+"  \n"
+"  float distance = roundedBoxSDF(p, center, radius);\n"
+"  \n"
+"  if (distance > 0.0) {\n"
+"    discard;\n"
+"  }\n"
+"  \n"
+"  FragColor = color * Color;\n"
 "}\n";
 
 // Utility function to read shader from file
 static char* read_shader_file(const char* filename) {
   FILE* file = fopen(filename, "rb");
   if (!file) {
-      fprintf(stderr, "Failed to open shader file: %s\n", filename);
-      return NULL;
+    fprintf(stderr, "Failed to open shader file: %s\n", filename);
+    return NULL;
   }
   
   fseek(file, 0, SEEK_END);
@@ -101,8 +101,8 @@ static char* read_shader_file(const char* filename) {
   
   char* buffer = (char*)malloc(length + 1);
   if (!buffer) {
-      fclose(file);
-      return NULL;
+    fclose(file);
+    return NULL;
   }
   
   fread(buffer, 1, length, file);
@@ -124,10 +124,10 @@ static unsigned int compile_shader(GLenum type, const char* source) {
   glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
   
   if (!success) {
-      glGetShaderInfoLog(shader, 512, NULL, info_log);
-      fprintf(stderr, "Shader compilation failed:\n%s\n", info_log);
-      glDeleteShader(shader);
-      return 0;
+    glGetShaderInfoLog(shader, 512, NULL, info_log);
+    fprintf(stderr, "Shader compilation failed:\n%s\n", info_log);
+    glDeleteShader(shader);
+    return 0;
   }
   
   return shader;
@@ -137,13 +137,13 @@ static unsigned int compile_shader(GLenum type, const char* source) {
 unsigned int ui_compile_shader(const char* vertex_src, const char* fragment_src) {
   unsigned int vertex_shader = compile_shader(GL_VERTEX_SHADER, vertex_src);
   if (!vertex_shader) {
-      return 0;
+    return 0;
   }
   
   unsigned int fragment_shader = compile_shader(GL_FRAGMENT_SHADER, fragment_src);
   if (!fragment_shader) {
-      glDeleteShader(vertex_shader);
-      return 0;
+    glDeleteShader(vertex_shader);
+    return 0;
   }
   
   // Link shaders
@@ -158,12 +158,12 @@ unsigned int ui_compile_shader(const char* vertex_src, const char* fragment_src)
   glGetProgramiv(program, GL_LINK_STATUS, &success);
   
   if (!success) {
-      glGetProgramInfoLog(program, 512, NULL, info_log);
-      fprintf(stderr, "Shader program linking failed:\n%s\n", info_log);
-      glDeleteShader(vertex_shader);
-      glDeleteShader(fragment_shader);
-      glDeleteProgram(program);
-      return 0;
+    glGetProgramInfoLog(program, 512, NULL, info_log);
+    fprintf(stderr, "Shader program linking failed:\n%s\n", info_log);
+    glDeleteShader(vertex_shader);
+    glDeleteShader(fragment_shader);
+    glDeleteProgram(program);
+    return 0;
   }
   
   // Clean up shaders
@@ -177,13 +177,13 @@ unsigned int ui_compile_shader(const char* vertex_src, const char* fragment_src)
 unsigned int ui_compile_shader_from_files(const char* vertex_file, const char* fragment_file) {
   char* vertex_source = read_shader_file(vertex_file);
   if (!vertex_source) {
-      return 0;
+    return 0;
   }
   
   char* fragment_source = read_shader_file(fragment_file);
   if (!fragment_source) {
-      free(vertex_source);
-      return 0;
+    free(vertex_source);
+    return 0;
   }
   
   unsigned int program = ui_compile_shader(vertex_source, fragment_source);
@@ -213,7 +213,7 @@ unsigned int ui_create_rounded_shader(void) {
 static int get_uniform_location(unsigned int shader, const char* name) {
   int location = glGetUniformLocation(shader, name);
   if (location == -1) {
-      fprintf(stderr, "Warning: Uniform '%s' not found in shader\n", name);
+    fprintf(stderr, "Warning: Uniform '%s' not found in shader\n", name);
   }
   return location;
 }
@@ -223,7 +223,7 @@ void ui_set_uniform_mat4(unsigned int shader, const char* name, const float* mat
   glUseProgram(shader);
   int location = get_uniform_location(shader, name);
   if (location != -1) {
-      glUniformMatrix4fv(location, 1, GL_FALSE, matrix);
+    glUniformMatrix4fv(location, 1, GL_FALSE, matrix);
   }
 }
 
@@ -239,7 +239,7 @@ void ui_set_uniform_vec3(unsigned int shader, const char* name, float x, float y
   glUseProgram(shader);
   int location = get_uniform_location(shader, name);
   if (location != -1) {
-      glUniform3f(location, x, y, z);
+    glUniform3f(location, x, y, z);
   }
 }
 
@@ -247,7 +247,7 @@ void ui_set_uniform_vec2(unsigned int shader, const char* name, float x, float y
   glUseProgram(shader);
   int location = get_uniform_location(shader, name);
   if (location != -1) {
-      glUniform2f(location, x, y);
+    glUniform2f(location, x, y);
   }
 }
 
@@ -255,7 +255,7 @@ void ui_set_uniform_int(unsigned int shader, const char* name, int value) {
   glUseProgram(shader);
   int location = get_uniform_location(shader, name);
   if (location != -1) {
-      glUniform1i(location, value);
+    glUniform1i(location, value);
   }
 }
 
@@ -263,7 +263,7 @@ void ui_set_uniform_float(unsigned int shader, const char* name, float value) {
   glUseProgram(shader);
   int location = get_uniform_location(shader, name);
   if (location != -1) {
-      glUniform1f(location, value);
+    glUniform1f(location, value);
   }
 }
 
@@ -271,7 +271,7 @@ void ui_set_uniform_bool(unsigned int shader, const char* name, bool value) {
   glUseProgram(shader);
   int location = get_uniform_location(shader, name);
   if (location != -1) {
-      glUniform1i(location, value ? 1 : 0);
+    glUniform1i(location, value ? 1 : 0);
   }
 }
 
@@ -280,7 +280,7 @@ void ui_set_uniform_texture(unsigned int shader, const char* name, unsigned int 
   glUseProgram(shader);
   int location = get_uniform_location(shader, name);
   if (location != -1) {
-      glUniform1i(location, texture_unit);
+    glUniform1i(location, texture_unit);
   }
 }
 
@@ -319,10 +319,10 @@ unsigned int ui_create_batch_shader(void) {
   "uniform mat4 projection;\n"
   "\n"
   "void main() {\n"
-  "    vec2 transformedPos = aPos * aTransform.zw + aTransform.xy;\n"
-  "    gl_Position = projection * vec4(transformedPos, 0.0, 1.0);\n"
-  "    TexCoord = aTexCoord;\n"
-  "    Color = aColor;\n"
+  "  vec2 transformedPos = aPos * aTransform.zw + aTransform.xy;\n"
+  "  gl_Position = projection * vec4(transformedPos, 0.0, 1.0);\n"
+  "  TexCoord = aTexCoord;\n"
+  "  Color = aColor;\n"
   "}\n";
   
   return ui_compile_shader(batch_vertex_source, fragment_shader_source);
@@ -348,10 +348,10 @@ shader_manager* ui_create_shader_manager(void) {
   
   // Check if all shaders were created successfully
   if (!manager->ui_shader || !manager->solid_shader || 
-      !manager->rounded_shader || !manager->batch_shader) {
-      fprintf(stderr, "Failed to create one or more shaders\n");
-      free(manager);
-      return NULL;
+    !manager->rounded_shader || !manager->batch_shader) {
+    fprintf(stderr, "Failed to create one or more shaders\n");
+    free(manager);
+    return NULL;
   }
   
   return manager;
@@ -384,10 +384,10 @@ unsigned int ui_shader_manager_get_shader(shader_manager* manager, int shader_ty
   if (!manager) return 0;
   
   switch (shader_type) {
-      case 0: return manager->ui_shader;      // Default UI shader
-      case 1: return manager->solid_shader;   // Solid color shader
-      case 2: return manager->rounded_shader; // Rounded rectangle shader
-      case 3: return manager->batch_shader;   // Batch rendering shader
-      default: return manager->ui_shader;
+    case 0: return manager->ui_shader;      // Default UI shader
+    case 1: return manager->solid_shader;   // Solid color shader
+    case 2: return manager->rounded_shader; // Rounded rectangle shader
+    case 3: return manager->batch_shader;   // Batch rendering shader
+    default: return manager->ui_shader;
   }
 }

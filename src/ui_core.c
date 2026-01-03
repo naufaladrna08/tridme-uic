@@ -1,3 +1,11 @@
+/* 
+ * Tridme UI Core Rendering
+ * 
+ * OpenGL Implementation for Rendering Shapes and Event Handling.
+ * 
+ * (C) Kincir Angin Studio
+ */
+
 #include <ui_core.h>
 #include <ui_shaders.h>
 #include <ui_widgets.h>
@@ -129,7 +137,7 @@ static unsigned int create_texture_atlas(UIContext* ctx) {
 }
 
 UIContext* ui_create_context(int window_width, int window_height) {
-  UIContext* ctx = (UIContext*)calloc(1, sizeof(UIContext));
+  UIContext* ctx = (UIContext*) calloc(1, sizeof(UIContext));
   if (!ctx) return NULL;
   
   ctx->width = window_width;

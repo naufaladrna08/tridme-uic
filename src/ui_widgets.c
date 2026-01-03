@@ -1,8 +1,8 @@
+#include "ui_styles.h"
 #include <stdio.h>
 #include <ui_widgets.h>
 #include <GL/glew.h>
 
-// Simple hash function for widget IDs
 static ui_id hash_string(const char* str) {
   ui_id hash = 5381;
   int c;
@@ -57,6 +57,19 @@ void ui_label(UIContext* ctx, const char* text, rect bounds, color text_color) {
     bounds.pos.y + bounds.size.y * 0.5f + 4.0f  // Center baseline with offset
   };
   ui_draw_text(ctx, text, text_pos, text_color);
+}
+
+void ui_label_with_style(UIContext* ctx, const char* text, rect bounds, TextStyle style) {
+  // Measure text width
+  float text_width = ui_measure_text(ctx, text);
+  
+  // Center text horizontally and vertically
+  // For vertical: position baseline at center, then adjust for typical ascent
+  vec2 text_pos = {
+    bounds.pos.x + (bounds.size.x - text_width) * 0.5f,
+    bounds.pos.y + bounds.size.y * 0.5f + 4.0f  // Center baseline with offset
+  };
+  ui_draw_text(ctx, text, text_pos, style.color);
 }
 
 bool ui_slider_float(UIContext* ctx, const char* id, rect bounds, float* value, float min_val, float max_val) {
@@ -282,12 +295,18 @@ bool ui_text_input(UIContext* ctx, const char* id, rect bounds, char* buffer, si
 }
 
 void ui_panel_begin(UIContext *ctx, const char *id, rect bounds, color bg_color) {
-  // Draw panel background
-  ui_draw_rect(ctx, bounds, bg_color);
+  static bool is_printed = false;
+
+  if (!is_printed) {
+    is_printed = true;
+  }
   
   // Push layout offset for child widgets
   vec2 panel_offset = {bounds.pos.x, bounds.pos.y};
   ui_push_layout(ctx, panel_offset);
+
+  // Draw panel background
+  ui_draw_rect(ctx, bounds, bg_color);
 }
 
 void ui_panel_end(UIContext* ctx) {
