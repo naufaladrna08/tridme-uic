@@ -143,6 +143,7 @@ UIContext* ui_create_context(int window_width, int window_height) {
   ctx->width = window_width;
   ctx->height = window_height;
   ctx->shader = ui_create_ui_shader();
+  ctx->margin = 10;
   
   // Setup buffers
   glGenVertexArrays(1, &ctx->vao);
@@ -400,5 +401,6 @@ float ui_measure_text(UIContext* ctx, const char* text) {
     if (ch < 32 || ch >= 128) continue;
     width += ctx->glyphs[ch].advance;
   }
+
   return width;
 }

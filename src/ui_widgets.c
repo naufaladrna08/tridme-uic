@@ -1,3 +1,4 @@
+#include "ui_core.h"
 #include "ui_styles.h"
 #include <stdio.h>
 #include <ui_widgets.h>
@@ -14,7 +15,19 @@ static ui_id hash_string(const char* str) {
 
 bool ui_button(UIContext* ctx, const char* label, rect bounds) {
   ui_id id = hash_string(label);
-  
+
+  /*
+   * If the rect bounds is (0, 0), we count the size for the label's length
+   * and measure the size based of that.
+   */ 
+  if (bounds.size.x == 0 && bounds.size.y == 0) {
+    float text_width = ui_measure_text(ctx, label);
+    float padding = 10;
+
+    bounds.size.x = text_width + padding * 2;
+    bounds.size.y = ctx->font_size + padding * 2;
+  }
+
   // Check interaction
   bool hovered = ui_is_hovered(ctx, bounds);
   bool clicked = ui_is_clicked(ctx, bounds, 0);

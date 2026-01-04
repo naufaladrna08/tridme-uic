@@ -105,15 +105,27 @@ int main(int argc, const char** argv) {
     ui_panel_begin(ui, "main_panel", (rect) { { 0, 0 }, { WINDOW_WIDTH, WINDOW_HEIGHT } }, color_from_hex("#3f3f3fff"));
     ui_push_layout(ui, (vec2) { 0, 0 });
 
-    for (int i = 0; i < 4; i++) {
-      rect btn_bounds = {
-        { i * button_size, 0 },
-        { button_size, button_size / 3 }
-      };
+    // for (int i = 0; i < 4; i++) {
+    //   rect btn_bounds = {
+    //     { i * button_size, 0 },
+    //     { button_size, button_size / 3 }
+    //   };
 
-      if (ui_button(ui, menu[i], btn_bounds)) {
-        printf("Button is pressed\n");
-      }
+    //   if (ui_button(ui, menu[i], btn_bounds)) {
+    //     printf("Button is pressed\n");
+    //   }
+    // }
+
+    if (ui_button(ui, "Hello World", (rect) {{ 0, 0} , {0, 0}})) {
+      printf("const char *restrict format, ..\n");
+    }
+
+    if (ui_button(ui, "Hello World 2", (rect) {{ 0, 0} , {0, 0}})) {
+      printf("const char *restrict format, ..\n");
+    }
+
+    if (ui_button(ui, "Hello World 3", (rect) {{ 0, 0} , {0, 0}})) {
+      printf("const char *restrict format, ..\n");
     }
     
     ui_pop_layout(ui);

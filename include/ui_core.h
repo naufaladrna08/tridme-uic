@@ -71,6 +71,10 @@ typedef struct {
   // Time
   float time;
   float delta_time;
+
+  // State
+  vec2  last_pos;
+  float margin;
 } UIContext;
 
 // Function prototypes

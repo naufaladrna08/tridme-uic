@@ -79,7 +79,7 @@ int main(void) {
     
     // Create a panel
     ui_panel_begin(ui, "main_panel", (rect){{50, 50}, {300, 400}}, 
-                  (color){0.5f, 0.5f, 0.5f, 1.0f});
+                  (color) {0.5f, 0.5f, 0.5f, 1.0f});
     
     // Push layout for this panel
     ui_push_layout(ui, (vec2){60, 60});
